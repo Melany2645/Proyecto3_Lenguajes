@@ -12,6 +12,18 @@ tiene_contradiccion(Persona) :-
     testimonio(Persona, Lugar, Hora),
     not(estuvo(Persona, Lugar, Hora)).
 
+posible_sospechoso(Persona) :-
+    persona(Persona),
+    evento(_, LugarEvento, _),
+    evidencia(Evidencia, LugarEvento, _),
+    corresponde(Evidencia, Persona).
 
+posible_sospechoso(Persona) :-
+    persona(Persona),
+    evento(_, LugarEvento, HoraEvento),
+    tiene_acceso(Persona, LugarEvento),
+    estuvo(Persona, LugarEvento, HoraEvento).
 
-
+posible_sospechoso(Persona) :-
+    persona(Persona),
+    tiene_contradiccion(Persona).
