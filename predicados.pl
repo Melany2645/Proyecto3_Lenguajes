@@ -118,4 +118,70 @@ explicaciones(Persona, Explicacion) :-
 
 explicaciones(Persona, Explicacion) :-
     descartar(Persona),
-    atom_concat('Fue descartado porque su coartada es solida y verificable', Explicacion). No newline at end of file
+    atom_concat('Fue descartado porque su coartada es solida y verificable', Explicacion). 
+
+resolver_caso :-
+    write('    Reporte de investigac'), nl,
+    write nl,
+    write('Evento investigado:'), nl,
+    evento(NombreEvento, LugarEvento, HoraEvento),
+    write('- Nombre: '), write(NombreEvento), nl,
+    write('- Lugar: '), write(LugarEvento), nl,
+    write('- Hora: '), write(HoraEvento), nl, nl,
+    write('POSIBLES RESPONSABLES:'), nl,
+    write('----------------------------------------'), nl,
+    posibles_responsables(ListaResponsables),
+    (ListaResponsables = [] ->
+        write('No se encontraron posibles responsables.'), nl
+    ;
+        forall(member(Persona, ListaResponsables),
+            (write('PERSONA: '), write(Persona), nl,
+            write('----------------------------------------'), nl,
+            write('Evidencias relacionadas:'), nl,
+            (evidencias_de(Persona, ListaEvidencias),
+                forall(member(Ev, ListaEvidencias),
+                    (write('  - '), write(Ev), nl))
+            ;
+                write('  Ninguna'), nl),
+            write('Ubicacion y movimientos:'), nl,
+            forall(estuvo(Persona, Lugar, Hora),
+                (write('  - Estuvo en '), write(Lugar),
+                write(' a las '), write(Hora), nl)),
+            write('Accesos relevantes:'), nl,
+            forall(tiene_acceso(Persona, LugarAcceso),
+                (write('  - Tiene acceso a '), write(LugarAcceso), nl)),
+            write('Coartadas:'), nl,
+            (tiene_coartada(Persona) ->
+                write('  Posee coartada'), nl
+            ;
+                write('  No tiene coartada valida'), nl),
+            write('Contradicciones:'), nl,
+            (tiene_contradiccion(Persona) ->
+                write('  Presenta contradicciones'), nl
+            ;
+                write('  No presenta contradicciones'), nl),
+            write('Justificacion logica:'), nl,
+            forall(explicaciones(Persona, Exp),
+                (write('  - '), write(Exp), nl)),
+            nl,
+            write('========================================'), nl,
+            nl)),
+    write('Personas descartadas:'), nl,
+    write('----------------------------------------'), nl,
+    forall((persona(PersonaDescartada), descartar(PersonaDescartada)),
+        (write('- '), write(PersonaDescartada), nl,
+        forall(explicaciones(PersonaDescartada, ExpDesc),
+            (write('  Razón: '), write(ExpDesc), nl)),
+        nl)),
+    write('========================================'), nl,
+    write('Conclusion:'), nl,
+    write('----------------------------------------'), nl,
+    (ListaResponsables = [] ->
+        write('No hay suficientes evidencias para determinar responsables.'), nl
+    ;
+        length(ListaResponsables, Cantidad),
+        write('Se identificaron '), write(Cantidad),
+        write(' posible(s) responsable(s).'), nl,
+        write('Personas: '), write(ListaResponsables), nl),
+    write('========================================'), nl.
+
