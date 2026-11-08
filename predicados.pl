@@ -1,19 +1,24 @@
-% Cargar la base de conocimiento
+% Carga los hechos del caso.
 :- consult('hechos.pl').
 
-% tiene_acceso(+Persona, +Lugar)
-% Determina si una persona tiene acceso directo a un lugar segun los permisos registrados.
-
+% Acceso directo.
 tiene_acceso(Persona, Lugar) :-
     acceso(Persona, Lugar).
 
-% Determina si una persona estuvo en un lugar dentro de un intervalo de tiempo.
+% Acceso mediante un objeto.
+tiene_acceso(Persona, Lugar) :-
+    accesoPorObjeto(Lugar, Objeto),
+    puede_utilizar_objeto(Persona, Objeto).
+
+puede_utilizar_objeto(Persona, Objeto) :-
+    persona(Persona),
+    ubicado(Objeto, Lugar),
+    estuvo(Persona, Lugar, _).
 
 estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     estuvo(Persona, Lugar, Hora),
     Hora >= Inicio,
     Hora =< Fin.
-
 
 % Josimar
 
@@ -46,4 +51,4 @@ explicaciones(Persona, Explicacion) :-
 
 explicaciones(Persona, Explicacion) :-
     descartar(Persona),
-    atom_concat('Fue descartado porque su coartada es solida y verificable', Explicacion).
+    atom_concat('Fue descartado porque su coartada es solida y verificable', Explicacion). No newline at end of file
