@@ -1,5 +1,4 @@
 
-
 % Personas involucradas
 persona(juan).
 persona(mateo).
@@ -55,11 +54,15 @@ evidencia(llave, bodega, 1950).
 evidencia(documento, oficina, 1930).
 
 % Relacion entre evidencias y personas
-corresponde(huella, bruno).
-corresponde(llave, bruno).
-corresponde(documento, ana).
+corresponde(huella, mateo).
+corresponde(llave, mateo).
+corresponde(documento, juan).
 
 % Testimonios
 testimonio(mateo, entrada, 1955).
 testimonio(carla, biblioteca, 1955).
 testimonio(juan, biblioteca, 1930).
+
+% Ubicacion de objetos
+ubicado(llave_maestra, oficina).
+ubicado(tarjeta_laboratorio, biblioteca).
