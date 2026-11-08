@@ -1,0 +1,24 @@
+{
+  "name": "proyecto3_lenguajes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Melany2645/Proyecto3_Lenguajes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Melany2645/Proyecto3_Lenguajes/issues"
+  },
+  "homepage": "https://github.com/Melany2645/Proyecto3_Lenguajes#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
