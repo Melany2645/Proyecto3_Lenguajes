@@ -1,11 +1,10 @@
-% Carga los hechos del caso.
 :- consult('hechos.pl').
 
-% Acceso directo.
+% DIEGO
+
 tiene_acceso(Persona, Lugar) :-
     acceso(Persona, Lugar).
 
-% Acceso mediante un objeto.
 tiene_acceso(Persona, Lugar) :-
     accesoPorObjeto(Lugar, Objeto),
     puede_utilizar_objeto(Persona, Objeto).
@@ -20,22 +19,21 @@ estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     Hora >= Inicio,
     Hora =< Fin.
 
+% MELANY
 
-% Melany
-
-evidencias_de(Persona, Evidencia) :- 
-    findall(Evidencia, corresponde(Evidencia, Persona), Evidencias),
-    member(Evidencia, Evidencias).
+evidencias_de(Persona, ListaEvidencias) :-
+    findall(Evidencia, corresponde(Evidencia, Persona), ListaEvidencias).
 
 tiene_coartada(Persona) :-
-    evento(_, LugarEvento, Hora),
+    evento(_, LugarEvento, HoraEvento),
     testimonio(Persona, Lugar, Hora),
     estuvo(Persona, Lugar, Hora),
-    Lugar \= LugarEvento.
+    Lugar \= LugarEvento,
+    abs(Hora - HoraEvento) < 60.
 
-tiene_contradiccion(Persona) :- 
+tiene_contradiccion(Persona) :-
     testimonio(Persona, Lugar, Hora),
-    not(estuvo(Persona, Lugar, Hora)).
+    \+ estuvo(Persona, Lugar, Hora).
 
 posible_sospechoso(Persona) :-
     persona(Persona),
@@ -51,9 +49,9 @@ posible_sospechoso(Persona) :-
 
 posible_sospechoso(Persona) :-
     persona(Persona),
-    tiene_contradiccion(Persona).
-
-% Regla para ver si una persona tiene o no evidencias relacionadas a un caso
+    tiene_contradiccion(Persona),
+    evento(_, LugarEvento, _),
+    (tiene_acceso(Persona, LugarEvento) ; corresponde(_, Persona)).
 
 evidencia_en_evento(Persona) :-
     persona(Persona),
@@ -69,38 +67,32 @@ descartar(Persona) :-
 
 investigar(Persona) :-
     persona(Persona),
-
-    findall(Lugar_Hora, estuvo(Persona, Lugar, Hora), Movimientos),
-    findall(Lugar, tiene_acceso(Persona, Lugar), Accesos),
+    findall(Lugar-Hora, estuvo(Persona, Lugar, Hora), Movimientos),
+    findall(LugarAcc, tiene_acceso(Persona, LugarAcc), Accesos),
     evidencias_de(Persona, Evidencias),
-
     nl,
-    write("-----------Informe------------"), nl,
-    write("Persona: "), write(Persona), nl,
-    write("Movimientos registrados: "), write(Movimientos), nl,
-    write("Lugares con acceso: "), write(Accesos), nl,
-    write("Evidencias relacionadas: "), write(Evidencias), nl,
+    write('----------- Informe ------------'), nl,
+    write('Persona: '), write(Persona), nl,
+    write('Movimientos registrados: '), write(Movimientos), nl,
+    write('Lugares con acceso: '), write(Accesos), nl,
+    write('Evidencias relacionadas: '), write(Evidencias), nl,
+    (tiene_coartada(Persona) -> write('Tiene coartada: Si'), nl ; write('Tiene coartada: No'), nl),
+    (tiene_contradiccion(Persona) -> write('Tiene contradicciones: Si'), nl ; write('Tiene contradicciones: No'), nl).
 
-    write("Tiene coartada: "), (tiene_coartada(Persona) -> write("Sí") ; write("No")), nl,
-    write("Tiene contradicciones: "), (tiene_contradiccion(Persona) -> write("Sí") ; write("No")), nl,
-
-    write("------------------------------")
-
-
-% Josimar
+% JOSIMAR
 
 posibles_responsables(Lista) :-
-    findall(Persona, (persona(Persona), posible_sospechoso(Persona), \+ descartar(Persona)), Lista).
+    setof(Persona, (persona(Persona), posible_sospechoso(Persona), \+ descartar(Persona)), Lista).
 
 explicaciones(Persona, Explicacion) :-
     evento(_, LugarEvento, _),
     tiene_acceso(Persona, LugarEvento),
-    atom_concat('Tenia acceso directo a la zona del evento: ', LugarEvento, Explicacion).
+    atomic_list_concat(['Tenia acceso directo a la zona del evento: ', LugarEvento], Explicacion).
 
 explicaciones(Persona, Explicacion) :-
     evento(_, LugarEvento, HoraEvento),
     estuvo_en_intervalo(Persona, LugarEvento, HoraEvento, 60),
-    atom_concat('Estuvo cerca del lugar del evento alrededor de la hora del suceso', Explicacion).
+    Explicacion = 'Estuvo cerca del lugar del evento alrededor de la hora del suceso'.
 
 explicaciones(Persona, Explicacion) :-
     corresponde(Evidencia, Persona),
@@ -109,20 +101,20 @@ explicaciones(Persona, Explicacion) :-
 
 explicaciones(Persona, Explicacion) :-
     tiene_contradiccion(Persona),
-    atom_concat('Presenta contradicciones entre su testimonio y los registros de movimiento', Explicacion).
+    Explicacion = 'Presenta contradicciones entre su testimonio y los registros de movimiento'.
 
 explicaciones(Persona, Explicacion) :-
     persona(Persona),
     \+ tiene_coartada(Persona),
-    atom_concat('No posee una coartada valida para el momento del evento', Explicacion).
+    Explicacion = 'No posee una coartada valida para el momento del evento'.
 
 explicaciones(Persona, Explicacion) :-
     descartar(Persona),
-    atom_concat('Fue descartado porque su coartada es solida y verificable', Explicacion). 
+    Explicacion = 'Fue descartado porque su coartada es solida y verificable'.
 
 resolver_caso :-
-    write('    Reporte de investigac'), nl,
-    write nl,
+    write('    Reporte de investigacion'), nl,
+    write('============================'), nl,
     write('Evento investigado:'), nl,
     evento(NombreEvento, LugarEvento, HoraEvento),
     write('- Nombre: '), write(NombreEvento), nl,
@@ -138,18 +130,19 @@ resolver_caso :-
             (write('PERSONA: '), write(Persona), nl,
             write('----------------------------------------'), nl,
             write('Evidencias relacionadas:'), nl,
-            (evidencias_de(Persona, ListaEvidencias),
-                forall(member(Ev, ListaEvidencias),
-                    (write('  - '), write(Ev), nl))
+            evidencias_de(Persona, ListaEvidencias),
+            (ListaEvidencias = [] ->
+                write('  Ninguna'), nl
             ;
-                write('  Ninguna'), nl),
+                forall(member(Ev, ListaEvidencias), (write('  - '), write(Ev), nl))),
             write('Ubicacion y movimientos:'), nl,
             forall(estuvo(Persona, Lugar, Hora),
-                (write('  - Estuvo en '), write(Lugar),
-                write(' a las '), write(Hora), nl)),
+                (write('  - Estuvo en '), write(Lugar), write(' a las '), write(Hora), nl)),
             write('Accesos relevantes:'), nl,
-            forall(tiene_acceso(Persona, LugarAcceso),
-                (write('  - Tiene acceso a '), write(LugarAcceso), nl)),
+            findall(LugarAcc, tiene_acceso(Persona, LugarAcc), AccesosLista),
+            list_to_set(AccesosLista, AccesosUnicos),
+            forall(member(LugarAcc, AccesosUnicos),
+                (write('  - Tiene acceso a '), write(LugarAcc), nl)),
             write('Coartadas:'), nl,
             (tiene_coartada(Persona) ->
                 write('  Posee coartada'), nl
@@ -161,27 +154,19 @@ resolver_caso :-
             ;
                 write('  No presenta contradicciones'), nl),
             write('Justificacion logica:'), nl,
-            forall(explicaciones(Persona, Exp),
-                (write('  - '), write(Exp), nl)),
-            nl,
-            write('========================================'), nl,
-            nl)),
+            forall(explicaciones(Persona, Exp), (write('  - '), write(Exp), nl)),
+            nl, write('========================================'), nl, nl))),
     write('Personas descartadas:'), nl,
-    write('----------------------------------------'), nl,
     forall((persona(PersonaDescartada), descartar(PersonaDescartada)),
         (write('- '), write(PersonaDescartada), nl,
-        forall(explicaciones(PersonaDescartada, ExpDesc),
-            (write('  Razón: '), write(ExpDesc), nl)),
+        forall(explicaciones(PersonaDescartada, ExpDesc), (write('  Razon: '), write(ExpDesc), nl)),
         nl)),
     write('========================================'), nl,
     write('Conclusion:'), nl,
-    write('----------------------------------------'), nl,
     (ListaResponsables = [] ->
         write('No hay suficientes evidencias para determinar responsables.'), nl
     ;
         length(ListaResponsables, Cantidad),
-        write('Se identificaron '), write(Cantidad),
-        write(' posible(s) responsable(s).'), nl,
+        write('Se identificaron '), write(Cantidad), write(' posible(s) responsable(s).'), nl,
         write('Personas: '), write(ListaResponsables), nl),
     write('========================================'), nl.
-
