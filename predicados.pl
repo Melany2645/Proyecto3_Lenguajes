@@ -1,27 +1,56 @@
+
+% ************************Datos administrativos****************************
+%  Nombre del proyecto: Academia de detectives
+%  Archivo: predicados.pl
+%  Autor: Melany Jirón, Josimar Spencer y Diego Castillo
+%  Empresa: Instituto Tecnológico de Costa Rica
+%  ******************************Descripción*****************************
+%  Este archivo contiene los predicados que permiten analizar la información de los hechos 
+%  y generar un informe de investigación sobre el evento de desaparición en el museo.
+%  ******************************Versión*********************************
+%  1.0 | 09 de noviembre de 2026 | Melany Jirón, Josimar Spencer y Diego Castillo
+% *************************************************************************
+
 :- consult('hechos.pl').
 :- dynamic evento/3. 
 
+% Recibe una persona y un lugar y vincula la regla 
+% de que dicha persona tiene acceso a dicho lugar
 tiene_acceso(Persona, Lugar) :-
     acceso(Persona, Lugar).
 
+% Recibe una persona y un lugar y vincula la regla
+% de que dicha persona tiene acceso a dicho lugar mediante un objeto
+% Si la persona tiene acceso a un lugar mediante un objeto, se verifica si la persona puede utilizar dicho objeto.
 tiene_acceso(Persona, Lugar) :-
     accesoPorObjeto(Lugar, Objeto),
     puede_utilizar_objeto(Persona, Objeto).
 
+
+% Recibe una persona y un lugar y vincula la regla
+% de que dicha persona estuvo en dicho lugar en un momento determinado
+% Si la persona estuvo en un lugar, se verifica si la persona tiene acceso a dicho lugar.
 puede_utilizar_objeto(Persona, Objeto) :-
     persona(Persona),
     ubicado(Objeto, Lugar),
     estuvo(Persona, Lugar, _).
 
+% Recibe una persona, un lugar y un rango de tiempo
+% se verifica si la persona estuvo en dicho lugar dentro del rango de tiempo especificado
+%  
 estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     estuvo(Persona, Lugar, Hora),
     Hora >= Inicio,
     Hora =< Fin.
 
-
+% Recibe una persona y devuelve una lista de evidencias relacionadas con dicha persona
+%  
 evidencias_de(Persona, ListaEvidencias) :-
     findall(Evidencia, corresponde(Evidencia, Persona), ListaEvidencias).
 
+% Recibe una persona y verifica si tiene una coartada válida
+% Toma en cuenta el evento principal, los movimientos de la persona y 
+% su testimonio para determinar si tiene una coartada sólida.
 tiene_coartada(Persona) :-
     evento(_, LugarEvento, HoraEvento),
     testimonio(Persona, Lugar, Hora),
