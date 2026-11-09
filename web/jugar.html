@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Detectives - Datos del Evento</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="contenedor">
+        <h1> Datos del Evento</h1>
+        <p>Ingresa la información del caso a investigar:</p>
+        
+        <div id="mensajeError" class="error-message" style="display: none;">
+            <span id="textoError"></span>
+        </div>
+        
+        <form id="formEvento" onsubmit="event.preventDefault(); resolver();">
+            <label for="nombre">Nombre del evento:</label>
+            <input type="text" id="nombre" placeholder="Ej: desaparicion" required>
+            
+            <label for="lugar">Lugar donde ocurrió:</label>
+            <input type="text" id="lugar" placeholder="Ej: bodega" required>
+            
+            <label for="hora">Hora (formato HHMM):</label>
+            <input type="text" id="hora" placeholder="Ej: 2000" pattern="[0-9]{4}" required>
+            
+            <button type="submit"> Resolver Caso</button>
+        </form>
+    </div>
+
+    <script>
+        async function resolver() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const lugar = document.getElementById('lugar').value.trim();
+            const hora = document.getElementById('hora').value.trim();
+            const boton = document.querySelector('button');
+            const mensajeError = document.getElementById('mensajeError');
+            const textoError = document.getElementById('textoError');
+
+            mensajeError.style.display = 'none';
+
+            boton.textContent = 'Verificando evento...';
+            boton.disabled = true;
+
+            try {
+                const respuesta = await fetch('/api/resolver', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, lugar, hora })
+                });
+
+                const datos = await respuesta.json();
+
+                if (respuesta.ok && datos.resultado) {
+                    // Evento válido - guardar resultado y redirigir
+                    localStorage.setItem('resultado', datos.resultado);
+                    window.location.href = 'resultado.html';
+                } else {
+                    // Evento no existe - mostrar error
+                    textoError.textContent = datos.error || 'Evento no encontrado en la base de conocimiento.';
+                    mensajeError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                textoError.textContent = 'Error de conexión con el servidor.';
+                mensajeError.style.display = 'block';
+            } finally {
+                // Restaurar botón
+                boton.textContent = ' Resolver Caso';
+                boton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 :- consult('hechos.pl').
+:- dynamic evento/3. 
 
 % DIEGO
 

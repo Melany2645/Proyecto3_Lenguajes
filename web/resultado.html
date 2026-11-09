@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Detectives - Resultado</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="contenedor resultado-contenedor">
+        <h1> Resultado de la Investigación</h1>
+        
+        <pre id="reporte">Cargando investigación...</pre>
+        
+        <div class="botones">
+            <button onclick="window.location.href='jugar.html'"> Investigar otro caso</button>
+            <button onclick="window.location.href='index.html'"> Volver al Inicio</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reporteElement = document.getElementById('reporte');
+            const resultado = localStorage.getItem('resultado');
+            
+            if (resultado) {
+                reporteElement.textContent = resultado;
+            } else {
+                reporteElement.textContent = 'No hay resultados de investigación disponibles. Por favor, inicia un nuevo caso.';
+            }
+        });
+    </script>
+</body>
+</html>
