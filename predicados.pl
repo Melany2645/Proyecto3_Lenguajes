@@ -1,8 +1,6 @@
 :- consult('hechos.pl').
 :- dynamic evento/3. 
 
-% DIEGO
-
 tiene_acceso(Persona, Lugar) :-
     acceso(Persona, Lugar).
 
@@ -20,7 +18,6 @@ estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     Hora >= Inicio,
     Hora =< Fin.
 
-% MELANY
 
 evidencias_de(Persona, ListaEvidencias) :-
     findall(Evidencia, corresponde(Evidencia, Persona), ListaEvidencias).
@@ -79,8 +76,6 @@ investigar(Persona) :-
     write('Evidencias relacionadas: '), write(Evidencias), nl,
     (tiene_coartada(Persona) -> write('Tiene coartada: Si'), nl ; write('Tiene coartada: No'), nl),
     (tiene_contradiccion(Persona) -> write('Tiene contradicciones: Si'), nl ; write('Tiene contradicciones: No'), nl).
-
-% JOSIMAR
 
 posibles_responsables(Lista) :-
     setof(Persona, (persona(Persona), posible_sospechoso(Persona), \+ descartar(Persona)), Lista).
